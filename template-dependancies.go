@@ -426,6 +426,22 @@ func CoreDataTypes() map[string]string {
 	return dict
 }
 
+func LiasonSqliteTypes() map[string]string {
+	var dict = make(map[string]string)
+	dict["int"] = "Type.integer"
+	dict["integer"] = "Type.integer"
+	dict["short"] = "Type.integer"
+	dict["long"] = "Type.integer"
+	dict["float"] = "Type.real"
+	dict["double"] = "Type.real"
+	dict["boolean"] = "Type.text"
+	dict["char"] = "Type.text"
+	dict["character"] = "Type.text"
+	dict["string"] = "Type.text"
+	dict["byte"] = "Type.blob"
+	return dict
+}
+
 func ObjectiveCTypes() map[string]string {
 	var dict = make(map[string]string)
 	dict["int"] = "NSNumber"
@@ -483,29 +499,33 @@ func addCommonUtilitiesToTemplate(templateObject *template.Template) *template.T
 		"setCustomType":      SetCustomType,
 		"isCustomType":       IsCustomType,
 		"toCustomType":       ToCustomType,
+		"toColumnArray":      toColumnArray,
 	})
 	return templateObject
 }
 
 func addJavaUtilitiesToTemplate(templateObject *template.Template) *template.Template {
 	templateObject = templateObject.Funcs(template.FuncMap{
-		"hasListType":   HasListType,
-		"isSqliteType":  IsSqliteType,
-		"toSqliteType":  ToSqliteType,
-		"sqliteType":    SqliteTypes,
-		"isJavaType":    IsJavaType,
-		"toJavaType":    ToJavaType,
-		"javaType":      JavaTypes,
-		"idProp":        IdProp,
-		"packageToPath": PackageToPath,
+		"hasListType":        HasListType,
+		"isSqliteType":       IsSqliteType,
+		"toSqliteType":       ToSqliteType,
+		"sqliteType":         SqliteTypes,
+		"isJavaType":         IsJavaType,
+		"toJavaType":         ToJavaType,
+		"isLiasonSqliteType": IsLiasonSqliteType,
+		"toLiasonSqliteType": ToLiasonSqliteType,
+		"liasonSqliteType":   LiasonSqliteTypes,
+		"javaType":           JavaTypes,
+		"idProp":             IdProp,
+		"packageToPath":      PackageToPath,
 	})
 	return templateObject
 }
 
 func addObjectiveCUtilitiesToTempalte(templateObject *template.Template) *template.Template {
 	templateObject = templateObject.Funcs(template.FuncMap{
-		"toCoreDataType": ToCoreDataType,
-		"toObjectiveCType" : ToObjectiveCType,
+		"toCoreDataType":   ToCoreDataType,
+		"toObjectiveCType": ToObjectiveCType,
 	})
 	return templateObject
 }
@@ -515,4 +535,29 @@ func addRailsUitilitiesToTemplate(templateObject *template.Template) *template.T
 		"toRailsType": ToRailsType,
 	})
 	return templateObject
+}
+
+func toColumnArray(modelProperties []ModelProperty) string {
+	var columnArray []string
+	for key := range modelProperties {
+		modelProperty := modelProperties[key]
+		if IsLiasonSqliteType(modelProperty) {
+			columnArray = append(columnArray, strings.ToUpper(Snakecase(modelProperty.LocalIdentifier)))
+		}
+	}
+	var joinedString = strings.Join(columnArray, ", ")
+	return joinedString
+}
+
+func IsLiasonSqliteType(prop ModelProperty) bool {
+	_, ok := LiasonSqliteTypes()[strings.ToLower(prop.PropertyType)]
+	return ok && !prop.IsSetType
+}
+
+func ToLiasonSqliteType(prop ModelProperty) string {
+	if value, ok := LiasonSqliteTypes()[strings.ToLower(prop.PropertyType)]; ok {
+		return value
+	} else {
+		return prop.PropertyType
+	}
 }
