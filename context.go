@@ -46,6 +46,7 @@ type Model struct {
 	Parent     string
 	ParentRef  *Model
 	Properties []ModelProperty
+	LiasonType string
 }
 
 type ModelProperty struct {

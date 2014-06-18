@@ -500,6 +500,8 @@ func addCommonUtilitiesToTemplate(templateObject *template.Template) *template.T
 		"isCustomType":       IsCustomType,
 		"toCustomType":       ToCustomType,
 		"toColumnArray":      toColumnArray,
+		"isLiasonViewModel":  IsLiasonViewModel,
+		"isLiasonModel":      IsLiasonModel,
 	})
 	return templateObject
 }
@@ -560,4 +562,14 @@ func ToLiasonSqliteType(prop ModelProperty) string {
 	} else {
 		return prop.PropertyType
 	}
+}
+
+func IsLiasonViewModel(model Model) bool {
+	liasonType := strings.ToLower(model.LiasonType)
+	return liasonType == "viewmodel"
+}
+
+func IsLiasonModel(model Model) bool {
+	liasonType := strings.ToLower(model.LiasonType)
+	return liasonType == "" || liasonType == "model"
 }
